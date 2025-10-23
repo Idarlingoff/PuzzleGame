@@ -1,29 +1,77 @@
-import {Display} from "./Display.js";
-import {Color} from "./core/enum/ColorEnum.js";
-import {GoldenPlate} from "./core/plates/GoldenPlate.js";
-import {PressurePlate} from "./core/plates/PressurePlate.js";
-import {Player} from "./core/players/Player.js";
-import {Shape} from "./core/enum/ShapeEnum.js";
+import { Display } from "./Display.js";
+import { MovementSystem } from "./core/systems/MovementSystem.js";
+import { LevelManager } from "./core/systems/level/LevelManager.js";
 
-
-const display = new Display(12, 8, 32);
-
-const doors = [
-    { x: 6, y: 4, color: Color.RED, open: false },
-    { x: 7, y: 4, color: Color.WHITE, open: true }
+const LEVEL_URLS: string[] = [
+    "./dist/assets/json/level0.json",
+    "./dist/assets/json/level1.json",
+    "./dist/assets/json/level2.json",
+    "./dist/assets/json/level3.json",
+    "./dist/assets/json/level4.json",
+    "./dist/assets/json/level5.json",
 ];
 
-const golden = new GoldenPlate(2, 2);
-const redPlate = new PressurePlate(9, 6, Color.RED);
+class PuzzleGameTest {
+    private display?: Display;
+    private movement?: MovementSystem;
+    private manager: LevelManager;
 
-// simulateur : un joueur sur la golden, l’autre arrive
-// golden.onPlayerEnter();
+    constructor() {
+        this.manager = new LevelManager(LEVEL_URLS);
+        this.init().catch(err => console.error(err));
+    }
 
-const p1 = new Player(1, 1, 1, Color.BLUE, Shape.CIRCLE);
-const p2 = new Player(2, 8, 6, Color.RED, Shape.CIRCLE);
+    private async init() {
+        const level = await this.manager.load(0);
 
-display.render({
-    doors,
-    plates: [golden, redPlate],
-    players: [p1, p2]
-});
+        this.display = new Display(level.width, level.height, 32);
+
+        this.render();
+
+        this.movement = new MovementSystem(level, async () => {
+            this.render();
+
+            if (this.manager.isCompleted()) {
+                console.log(`Niveau ${this.manager.levelIndex} terminé !`);
+                await this.loadNextLevel();
+            }
+        });
+
+        this.movement.start();
+    }
+
+    private async loadNextLevel() {
+        this.movement?.stop();
+
+        const level = await this.manager.next();
+
+        this.movement = new MovementSystem(level, async () => {
+            this.render();
+            if (this.manager.isCompleted()) {
+                console.log(`Niveau ${this.manager.levelIndex} terminé !`);
+                await this.loadNextLevel();
+            }
+        });
+
+        if (!this.display || (this.display as any).resize) {
+            this.display = new Display(level.width, level.height, 32);
+        }
+
+        this.render();
+        this.movement.start();
+    }
+
+    private render() {
+        if (!this.display || !this.manager.level) return;
+        const lvl = this.manager.level;
+        this.display.render({
+            walls: lvl.walls,
+            doors: lvl.doors,
+            plates: lvl.plates,
+            players: lvl.players
+        });
+    }
+}
+
+new PuzzleGameTest();
+export {};
