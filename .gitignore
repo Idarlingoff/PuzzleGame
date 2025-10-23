@@ -1,28 +1,52 @@
-# === Sortie de compilation TypeScript ===
+# ===============================
+# Node & TypeScript build system
+# ===============================
+node_modules/
 dist/
-*.js.map
 *.tsbuildinfo
 
-# === Fichiers système (Windows / macOS / Linux) ===
+# ===============================
+# Environment & dependencies
+# ===============================
+.env
+.env.local
+.env.*.local
+
+# ===============================
+# Logs & diagnostics
+# ===============================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# ===============================
+# IDE / OS junk files
+# ===============================
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
-desktop.ini
-
-# === Éditeurs / IDE ===
-.vscode/
-.idea/
-.history/
-*.code-workspace
-
-# === Fichiers temporaires ===
-*.log
-*.tmp
-*.bak
-*.old
 *.swp
+*.swo
+*.tmp
 
-# === Sauvegardes automatiques (ex: VSCode, Notepad++, etc.) ===
-*~
-*.autosave
+# ===============================
+# Build tools / Editors
+# ===============================
+.idea/
+.vscode/
+*.iml
+
+# ===============================
+# Test / Coverage
+# ===============================
+coverage/
+*.lcov
+
+# ===============================
+# Misc
+# ===============================
+# Cache du serveur local http-server
+.cache/
+.tmp/
