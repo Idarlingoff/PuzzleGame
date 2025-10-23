@@ -43,8 +43,4 @@ export class Point {
     get shape(): Shape {
         return this._shape;
     }
-
-    set shape(value: Shape) {
-        this._shape = value;
-    }
 }

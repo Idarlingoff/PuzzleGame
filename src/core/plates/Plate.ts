@@ -25,19 +25,10 @@ export abstract class Plate extends Point {
         }
     }
 
-    resetState(): void {
-        this._occupancy = 0;
-        this._isActive = false;
-    }
-
     // ### GETTER - SETTER ### //
     abstract get kind(): "golden" | "pressure";
 
     get isActive(): boolean {
         return this._isActive;
-    }
-
-    get occupancy(): number {
-        return this._occupancy;
     }
 }

@@ -10,25 +10,9 @@ export class Player extends Point {
         this._id = id;
     }
 
-    wantMove(dx: number, dy: number): { x: number; y: number } {
-        return {
-            x: this.coordonneesX + dx,
-            y: this.coordonneesY + dy,
-        };
-    }
-
     applyMove(x: number, y: number): void {
         this.coordonneesX = x;
         this.coordonneesY = y;
-    }
-
-    teleportTo(x: number, y: number): void {
-        this.coordonneesX = x;
-        this.coordonneesY = y;
-    }
-
-    isAt(x: number, y: number): boolean {
-        return this.coordonneesX === x && this.coordonneesY === y;
     }
 
     // ### GETTER - SETTER ### //

@@ -23,12 +23,4 @@ export class PressurePlate extends Plate {
     get kind(): "golden" | "pressure" {
         return "pressure";
     }
-
-    get linkedDoorId(): string | undefined {
-        return this._linkedDoorId;
-    }
-
-    set linkedDoorId(value: string | undefined) {
-        this._linkedDoorId = value;
-    }
 }
