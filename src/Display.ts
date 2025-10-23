@@ -34,7 +34,6 @@ export class Display {
         this.drawer = new Drawer(gridWidth, gridHeight, scale);
     }
 
-    /** Efface l’écran. À rappeler avant un nouveau rendu. */
     clear(): void {
         this.drawer.clear();
     }
