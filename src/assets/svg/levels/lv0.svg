@@ -1,0 +1,26 @@
+<svg viewBox="0 0 600 600">
+  <defs>
+    <pattern id="grid1" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  
+  <!-- Fond blanc et grille -->
+  <rect width="600" height="600" fill="white"/>
+  <rect width="600" height="600" fill="url(#grid1)"/>
+  
+  <!-- Murs extérieurs -->
+  <rect x="160" y="80" width="280" height="40" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="120" y="80" width="40" height="360" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="440" y="80" width="40" height="360" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="160" y="400" width="280" height="40" fill="#666" stroke="#444" stroke-width="4"/>
+  
+  <!-- Murs intérieurs -->
+  
+  <!-- Joueurs -->
+  <circle cx="180.5" cy="140.5" r="15" fill="#4a90e2" stroke="#2171c7" stroke-width="5"/>
+  <circle cx="420.5" cy="380.5" r="15" fill="#e24a4a" stroke="#c72121" stroke-width="5"/>
+  
+  <!-- Objectif -->
+  <circle cx="300.5" cy="260.5" r="15" fill="#ffd700" stroke="#b59b00" stroke-width="5"/>
+</svg>

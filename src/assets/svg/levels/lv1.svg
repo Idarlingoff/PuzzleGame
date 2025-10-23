@@ -1,0 +1,27 @@
+<svg viewBox="0 0 600 600">
+  <defs>
+    <pattern id="grid1" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Fond blanc et grille -->
+  <rect width="600" height="600" fill="white"/>
+  <rect width="600" height="600" fill="url(#grid1)"/>
+
+  <!-- Mur vertical -->
+  <rect x="240" y="0" width="40" height="600" fill="#666" stroke="#444" stroke-width="4"/>
+
+  <!-- Porte -->
+  <rect x="240" y="240" width="40" height="40" fill="#4CAF50" stroke="#2E7D32" stroke-width="4"/>
+
+  <!-- Plaque de pression remplacée par un diamant -->
+  <polygon points="380,240 400,260 380,280 360,260" fill="#4CAF50" stroke="#2E7D32" stroke-width="4"/>
+
+  <!-- Joueurs -->
+  <circle cx="180" cy="260" r="15" fill="#4a90e2" stroke="#2171c7" stroke-width="5"/>
+  <circle cx="420" cy="260" r="15" fill="#e24a4a" stroke="#c72121" stroke-width="5"/>
+
+  <!-- Objectif -->
+  <circle cx="380" cy="180" r="15" fill="#ffd700" stroke="#b59b00" stroke-width="5"/>
+</svg>

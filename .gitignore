@@ -1,0 +1,28 @@
+# === Sortie de compilation TypeScript ===
+dist/
+*.js.map
+*.tsbuildinfo
+
+# === Fichiers système (Windows / macOS / Linux) ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# === Éditeurs / IDE ===
+.vscode/
+.idea/
+.history/
+*.code-workspace
+
+# === Fichiers temporaires ===
+*.log
+*.tmp
+*.bak
+*.old
+*.swp
+
+# === Sauvegardes automatiques (ex: VSCode, Notepad++, etc.) ===
+*~
+*.autosave

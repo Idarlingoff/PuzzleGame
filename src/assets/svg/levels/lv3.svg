@@ -1,0 +1,41 @@
+<svg viewBox="0 0 600 600">
+  <defs>
+    <pattern id="grid1" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#000" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Fond blanc et grille -->
+  <rect width="600" height="600" fill="white"/>
+  <rect width="600" height="600" fill="url(#grid1)"/>
+
+  <!-- Murs extérieurs -->
+  <rect x="80" y="40" width="440" height="40" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="80" y="40" width="40" height="520" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="480" y="40" width="40" height="520" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="80" y="520" width="440" height="40" fill="#666" stroke="#444" stroke-width="4"/>
+
+  <!-- Murs intérieurs -->
+  <rect x="120" y="200" width="200" height="40" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="120" y="360" width="360" height="40" fill="#666" stroke="#444" stroke-width="4"/>
+  <rect x="320" y="80" width="40" height="280" fill="#666" stroke="#444" stroke-width="4"/>
+
+  <!-- Portes et plaques - Paire 1 (Orange) -->
+  <rect x="280" y="200" width="40" height="40" fill="#FF8C00" stroke="#885000" stroke-width="4"/>
+  <polygon points="420,120 440,140 420,160 400,140" fill="#FF8C00" stroke="#885000" stroke-width="4"/>
+
+  <!-- Portes et plaques - Paire 2 (Vert) -->
+  <rect x="360" y="360" width="40" height="40" fill="#00FF00" stroke="#008800" stroke-width="4"/>
+  <polygon points="180,280 200,300 180,320 160,300" fill="#00FF00" stroke="#008800" stroke-width="4"/>
+
+  <!-- Portes et plaques - Paire 3 (Violet) -->
+  <rect x="280" y="360" width="40" height="40" fill="#8A2BE2" stroke="#4A1582" stroke-width="4"/>
+  <polygon points="420,440 440,460 420,480 400,460" fill="#8A2BE2" stroke="#4A1582" stroke-width="4"/>
+
+  <!-- Joueurs -->
+  <circle cx="140.5" cy="100.5" r="15" fill="#4a90e2" stroke="#2171c7" stroke-width="5"/>
+  <circle cx="420.5" cy="100.5" r="15" fill="#e24a4a" stroke="#c72121" stroke-width="5"/>
+
+  <!-- Objectif -->
+  <circle cx="300.5" cy="460.5" r="15" fill="#ffd700" stroke="#b59b00" stroke-width="5"/>
+</svg>
