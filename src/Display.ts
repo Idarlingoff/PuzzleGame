@@ -39,10 +39,6 @@ export class Display {
         this.drawer.clear();
     }
 
-    /**
-     * Rendu “complet” en un appel : murs → portes → plaques → joueurs
-     * (ordre d’empilement utile pour la lisibilité).
-     */
     render(params: {
         walls?: DrawableWall[] | Set<string>;
         doors?: DrawableDoor[];
@@ -127,7 +123,6 @@ export class Display {
 
 /* ------------------------------ Helpers couleurs ------------------------------ */
 
-/** Map de tes ColorEnum → hexa (adapte selon tes valeurs effectives) */
 function colorToHex(c: Color): string {
     switch (c) {
         case Color.GOLD:   return "#F1C40F";
