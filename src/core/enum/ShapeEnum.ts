@@ -3,4 +3,5 @@ export enum Shape {
   SQUARE = "square",
   TRIANGLE = "triangle",
   STAR = "star",
+  DIAMOND = "diamond"
 }

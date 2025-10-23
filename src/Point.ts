@@ -1,5 +1,5 @@
-import {Color} from "./enum/ColorEnum";
-import {Shape} from "./enum/ShapeEnum";
+import {Color} from "./core/enum/ColorEnum.js";
+import {Shape} from "./core/enum/ShapeEnum.js";
 
 export class Point {
 
@@ -15,6 +15,7 @@ export class Point {
         this._shape = shape;
     }
 
+    // ### GETTER - SETTER ### //
     get coordonneesX(): number {
         return this._coordonneesX;
     }
