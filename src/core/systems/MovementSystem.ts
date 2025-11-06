@@ -3,8 +3,9 @@ import { Plate } from "../plates/Plate.js";
 import { GoldenPlate } from "../plates/GoldenPlate.js";
 import { PressurePlate } from "../plates/PressurePlate.js";
 import { Color } from "../enum/ColorEnum.js";
+import { Door } from "../Door.js";
+import { Wall } from "../Wall.js";
 
-export type Door = { x: number; y: number; color: Color; open: boolean };
 
 export type LevelState = {
     width: number;
@@ -98,7 +99,7 @@ export class MovementSystem {
     }
 
     private isClosedDoor(x: number, y: number) {
-        return this.state.doors.some(d => d.x === x && d.y === y && !d.open);
+        return this.state.doors.some(d => d.coordonneesX === x && d.coordonneesY === y && !d.open);
     }
 
     private getPlateAt(x: number, y: number): Plate | undefined {

@@ -2,10 +2,10 @@ import { Player } from "../../players/Player.js";
 import { GoldenPlate } from "../../plates/GoldenPlate.js";
 import { PressurePlate } from "../../plates/PressurePlate.js";
 import { Plate } from "../../plates/Plate.js";
+import { Door } from "../../Door.js";
+import { Wall } from "../../Wall.js";
 import { Color } from "../../enum/ColorEnum.js";
 import { Shape } from "../../enum/ShapeEnum.js";
-
-export type Door = { x: number; y: number; color: Color; open: boolean };
 
 export type LevelState = {
     width: number;
@@ -34,20 +34,24 @@ function colorFromId(id: number): Color {
 export function buildLevelFromJson(json: any): LevelState {
     const [w, h] = json.Size as [number, number];
 
+    // Murs
     const walls = new Set<string>();
     for (const [x, y] of json.Walls as Array<[number, number]>) {
         walls.add(key(x, y));
     }
 
-    const doors: Door[] = (json.Doors as Array<[number, number, number]> | undefined)?.map(
-        ([x, y, colorId]) => ({
-            x, y,
-            color: colorFromId(colorId),
-            open: false
-        })
-    ) ?? [];
+    // Portes
+    const doors: Door[] = [];
+    for (const [x, y, colorId] of (json.Doors as Array<[number, number, number]> ?? [])) {
+        const color = colorFromId(colorId);
+        const door = new Door(x, y, false, color);
+        doors.push(door);
+    }
 
+    // Plaques
     const plates: Plate[] = [];
+
+    // Plaque d'arrivée (dorée)
     if (Array.isArray(json.EndPlates) && json.EndPlates.length === 2) {
         const [gx, gy] = json.EndPlates as [number, number];
         const golden = new GoldenPlate(gx, gy);
@@ -56,12 +60,14 @@ export function buildLevelFromJson(json: any): LevelState {
         console.warn("EndPlates manquant ou invalide dans le JSON du niveau.");
     }
 
+    // Plaques de pression
     for (const [x, y, colorId] of (json.PressurePlates as Array<[number, number, number]> ?? [])) {
         const color = colorFromId(colorId);
-        const plate = new PressurePlate(x, y, color /* linkedDoorId? inutile si on ouvre par couleur */);
+        const plate = new PressurePlate(x, y, color);
         plates.push(plate);
     }
 
+    // Joueurs
     const [p1start, p2start] = json.PlayersStart as [[number, number], [number, number]];
     const p1 = new Player(1, p1start[0], p1start[1], Color.BLUE, Shape.CIRCLE);
     const p2 = new Player(2, p2start[0], p2start[1], Color.RED, Shape.CIRCLE);

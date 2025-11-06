@@ -4,19 +4,13 @@ import {Plate} from "./core/plates/Plate.js";
 import {Drawer} from "./Drawer.js";
 import {GoldenPlate} from "./core/plates/GoldenPlate.js";
 import {Shape} from "./core/enum/ShapeEnum.js";
+import {Door} from "./core/Door.js";
+import {Wall} from "./core/Wall.js";
 
 
-export interface DrawableDoor {
-    x: number;
-    y: number;
-    color: Color;
-    open: boolean;
-}
+export type DrawableDoor = Door;
 
-export interface DrawableWall {
-    x: number;
-    y: number;
-}
+export type DrawableWall = Wall;
 
 export type DrawablePlayer = Point;
 
@@ -62,7 +56,7 @@ export class Display {
             }
         } else {
             for (const w of walls) {
-                this.drawer.drawRectangle(w.x, w.y, "#333333", 1);
+                this.drawer.drawRectangle(w.coordonneesX, w.coordonneesY, "#333333", 1);
             }
         }
     }
@@ -71,7 +65,7 @@ export class Display {
         for (const d of doors) {
             const base = colorToHex(d.color);
             const color = d.open ? withAlpha(base, 0.25) : base;
-            this.drawer.drawRectangle(d.x, d.y, color, 1);
+            this.drawer.drawRectangle(d.coordonneesX, d.coordonneesY, color, 1);
         }
     }
 
