@@ -10,7 +10,7 @@ import { Shape } from "../../enum/ShapeEnum.js";
 export type LevelState = {
     width: number;
     height: number;
-    walls: Set<string>;
+    walls: Wall[];
     doors: Door[];
     plates: Plate[];
     players: [Player, Player];
@@ -35,9 +35,10 @@ export function buildLevelFromJson(json: any): LevelState {
     const [w, h] = json.Size as [number, number];
 
     // Murs
-    const walls = new Set<string>();
+    const walls: Wall[] = [];
     for (const [x, y] of json.Walls as Array<[number, number]>) {
-        walls.add(key(x, y));
+        const wall = new Wall(x, y);
+        walls.push(wall);
     }
 
     // Portes
