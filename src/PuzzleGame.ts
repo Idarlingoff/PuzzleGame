@@ -10,7 +10,7 @@ import type {
 } from "./core/network/messages.js";
 import type { Color } from "./core/enum/ColorEnum.js";
 import type { Shape } from "./core/enum/ShapeEnum.js";
-import { io, type Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 
 type DrawableDoorLike = {
     coordonneesX: number;
