@@ -40,27 +40,45 @@ declare module "node:path" {
     export function join(...segments: string[]): string;
 }
 
-declare module "ws" {
-    export type RawData = string | ArrayBuffer | Uint8Array;
-
-    export class WebSocket {
-        static readonly OPEN: number;
-        readyState: number;
-        send(data: string): void;
-        close(): void;
-        on(event: "message", listener: (data: RawData) => void): this;
-        on(event: "close", listener: () => void): this;
-        on(event: "error", listener: (err: unknown) => void): this;
+declare module "socket.io" {
+    export interface ServerOptions {
+        path?: string;
+        transports?: string[];
     }
 
-    export interface WebSocketServerOptions {
-        server: any;
+    export class Server<ListenEvents = any, EmitEvents = any> {
+        constructor(server: any, options?: ServerOptions);
+        on(event: "connection", listener: (socket: Socket<ListenEvents, EmitEvents>) => void): this;
     }
 
-    export class WebSocketServer {
-        constructor(options: WebSocketServerOptions);
-        on(event: "connection", listener: (socket: WebSocket, request: any) => void): this;
+    export class Socket<ListenEvents = any, EmitEvents = any> {
+        handshake: { query?: Record<string, string | string[] | undefined> };
+        emit<E extends keyof EmitEvents>(event: E, payload: EmitEvents[E]): boolean;
+        emit(event: string, payload?: any): boolean;
+        on<E extends keyof ListenEvents>(event: E, listener: (payload: ListenEvents[E]) => void): this;
+        on(event: string, listener: (...args: any[]) => void): this;
+        disconnect(): this;
     }
+
+    export { Server as SocketIOServer };
+}
+
+declare module "socket.io-client" {
+    export interface SocketOptions {
+        path?: string;
+        transports?: string[];
+    }
+
+    export class Socket<ListenEvents = any, EmitEvents = any> {
+        connected: boolean;
+        emit<E extends keyof EmitEvents>(event: E, payload: EmitEvents[E]): this;
+        emit(event: string, payload?: any): this;
+        on<E extends keyof ListenEvents>(event: E, listener: (payload: ListenEvents[E]) => void): this;
+        on(event: string, listener: (...args: any[]) => void): this;
+        disconnect(): this;
+    }
+
+    export function io<ListenEvents = any, EmitEvents = any>(url?: string, options?: SocketOptions): Socket<ListenEvents, EmitEvents>;
 }
 
 declare const process: {

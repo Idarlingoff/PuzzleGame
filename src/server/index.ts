@@ -3,16 +3,25 @@ import { createServer as createHttpsServer } from "node:https";
 import { readFile } from "node:fs/promises";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
-import { WebSocketServer, WebSocket, type RawData } from "ws";
+import { Server as SocketIOServer, type Socket } from "socket.io";
 
 import { MovementSystem, type Move, type PlayerIndex } from "../core/systems/MovementSystem.js";
 import { buildLevelFromJson, type LevelState } from "../core/systems/level/LevelLoader.js";
 import { GoldenPlate } from "../core/plates/GoldenPlate.js";
 import { serializeLevelState } from "../core/network/serialization.js";
-import type { ClientMessage, PlayerSlotSummary, ServerMessage } from "../core/network/messages.js";
+import type {
+    ClientToServerEvents,
+    PlayerSlotSummary,
+    ServerInitPayload,
+    ServerSlotsPayload,
+    ServerStatePayload,
+    ServerToClientEvents,
+} from "../core/network/messages.js";
+
+type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
 
 type ClientContext = {
-    socket: WebSocket;
+    socket: GameSocket;
     playerIndex: PlayerIndex | null;
 };
 
@@ -110,50 +119,38 @@ class GameRoom {
     }
 
     private sendInit(ctx: ClientContext) {
-        const message: ServerMessage = {
-            type: "init",
-            payload: {
-                you: ctx.playerIndex,
-                levelIndex: this.levelIndex,
-                state: serializeLevelState(this.level),
-                slots: this.slotSummary(),
-            },
+        const payload: ServerInitPayload = {
+            you: ctx.playerIndex,
+            levelIndex: this.levelIndex,
+            state: serializeLevelState(this.level),
+            slots: this.slotSummary(),
         };
-        safeSend(ctx.socket, message);
+        ctx.socket.emit("init", payload);
     }
 
     private broadcastState() {
-        const message: ServerMessage = {
-            type: "state",
-            payload: {
-                levelIndex: this.levelIndex,
-                state: serializeLevelState(this.level),
-            },
+        const payload: ServerStatePayload = {
+            levelIndex: this.levelIndex,
+            state: serializeLevelState(this.level),
         };
-        this.broadcast(message);
+        this.broadcast("state", payload);
     }
 
     private broadcastSlots() {
-        const message: ServerMessage = {
-            type: "slots",
-            payload: {
-                slots: this.slotSummary(),
-            },
+        const payload: ServerSlotsPayload = {
+            slots: this.slotSummary(),
         };
-        this.broadcast(message);
+        this.broadcast("slots", payload);
     }
 
-    private broadcast(message: ServerMessage) {
-        const payload = JSON.stringify(message);
+    private broadcast<E extends keyof ServerToClientEvents>(event: E, payload: ServerToClientEvents[E]) {
         for (const client of this.clients) {
-            if (client.socket.readyState === WebSocket.OPEN) {
-                client.socket.send(payload);
-            }
+            client.socket.emit(event, payload);
         }
     }
 
     private sendError(ctx: ClientContext, message: string) {
-        safeSend(ctx.socket, { type: "error", payload: { message } } satisfies ServerMessage);
+        ctx.socket.emit("error", { message });
     }
 
     private slotSummary(): PlayerSlotSummary[] {
@@ -205,33 +202,6 @@ function isLevelCompleted(level: LevelState): boolean {
     return !!golden?.isActive;
 }
 
-function safeSend(socket: WebSocket, message: ServerMessage) {
-    if (socket.readyState !== WebSocket.OPEN) return;
-    socket.send(JSON.stringify(message));
-}
-
-function parseClientMessage(data: RawData): ClientMessage | null {
-    const text = typeof data === "string"
-        ? data
-        : data instanceof ArrayBuffer
-            ? new TextDecoder().decode(data)
-            : data instanceof Uint8Array
-                ? new TextDecoder().decode(data)
-                : data && typeof (data as any).toString === "function"
-                    ? (data as any).toString()
-                    : null;
-    if (!text) {
-        console.error("Données client intraduisibles", data);
-        return null;
-    }
-    try {
-        return JSON.parse(text) as ClientMessage;
-    } catch (err) {
-        console.error("Message client invalide", err);
-        return null;
-    }
-}
-
 const certPath = process.env.TLS_CERT_PATH;
 const keyPath = process.env.TLS_KEY_PATH;
 const useTls = !!(certPath && keyPath);
@@ -243,33 +213,30 @@ const server = useTls
     })
     : createHttpServer();
 
-const wss = new WebSocketServer({ server });
+const io = new SocketIOServer<ClientToServerEvents, ServerToClientEvents>(server, {
+    path: "/ws",
+    transports: ["websocket"],
+});
 
-wss.on("connection", (socket, req) => {
-    const { searchParams } = new URL(req.url ?? "/", "https://localhost");
-    const gameId = searchParams.get("game") ?? "default";
+io.on("connection", socket => {
+    const rawGame = socket.handshake.query?.game;
+    const gameId = typeof rawGame === "string" && rawGame.length ? rawGame : "default";
     const context: ClientContext = { socket, playerIndex: null };
 
     void (async () => {
         const room = await getOrCreateRoom(gameId);
         room.addClient(context);
 
-        socket.on("message", data => {
-            const message = parseClientMessage(data);
-            if (!message) return;
-            switch (message.type) {
-                case "join":
-                    room.join(context, message.payload?.desired ?? null);
-                    break;
-                case "move":
-                    room.handleMove(context, message.payload);
-                    break;
-                default:
-                    break;
-            }
+        socket.on("join", payload => {
+            const desired = payload?.desired ?? null;
+            room.join(context, desired);
         });
 
-        socket.on("close", () => {
+        socket.on("move", move => {
+            room.handleMove(context, move);
+        });
+
+        socket.on("disconnect", () => {
             room.removeClient(context);
             if (!room.hasClients()) {
                 rooms.delete(gameId);
@@ -277,8 +244,8 @@ wss.on("connection", (socket, req) => {
         });
     })().catch(err => {
         console.error("Erreur lors de la connexion au salon", err);
-        safeSend(socket, { type: "error", payload: { message: "Impossible de rejoindre la partie" } } satisfies ServerMessage);
-        socket.close();
+        socket.emit("error", { message: "Impossible de rejoindre la partie" });
+        socket.disconnect();
     });
 });
 

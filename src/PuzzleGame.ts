@@ -1,9 +1,16 @@
 import { Display } from "./Display.js";
 import { keyToMoveP1, keyToMoveP2, type Move, type PlayerIndex } from "./core/systems/MovementSystem.js";
 import type { SerializedLevelState } from "./core/network/serialization.js";
-import type { ClientMessage, ServerMessage, ServerInitMessage, ServerStateMessage, ServerSlotsMessage } from "./core/network/messages.js";
+import type {
+    ClientToServerEvents,
+    PlayerSlotSummary,
+    ServerInitPayload,
+    ServerStatePayload,
+    ServerToClientEvents,
+} from "./core/network/messages.js";
 import type { Color } from "./core/enum/ColorEnum.js";
 import type { Shape } from "./core/enum/ShapeEnum.js";
+import { io, type Socket } from "socket.io-client";
 
 type DrawableDoorLike = {
     coordonneesX: number;
@@ -30,7 +37,7 @@ type DrawablePlayerLike = {
 
 class PuzzleGameClient {
     private display?: Display;
-    private socket?: WebSocket;
+    private socket?: Socket<ServerToClientEvents, ClientToServerEvents>;
     private playerIndex: PlayerIndex | null = null;
     private level?: SerializedLevelState;
     private levelIndex = 0;
@@ -45,80 +52,74 @@ class PuzzleGameClient {
     }
 
     private connect() {
-        const url = this.resolveWebSocketUrl();
-        this.socket = new WebSocket(url);
-
-        this.socket.addEventListener("open", () => {
-            this.send({ type: "join" });
+        const { url, path } = this.resolveServerEndpoint();
+        this.socket = io<ServerToClientEvents, ClientToServerEvents>(url, {
+            path,
+            transports: ["websocket"],
         });
 
-        this.socket.addEventListener("message", event => {
-            const message = this.parseMessage(event.data);
-            if (!message) return;
-            this.handleServerMessage(message);
+        this.socket.on("connect", () => {
+            this.socket?.emit("join");
         });
 
-        this.socket.addEventListener("close", () => {
+        this.socket.on("init", payload => this.applyInit(payload));
+        this.socket.on("state", payload => this.applyState(payload));
+        this.socket.on("slots", payload => this.applySlots(payload.slots));
+        this.socket.on("error", payload => {
+            console.error("Serveur:", payload.message);
+        });
+
+        this.socket.on("disconnect", () => {
             this.socket = undefined;
             console.warn("Connexion fermée, tentative de reconnexion dans 3s");
             setTimeout(() => this.connect(), 3000);
         });
 
-        this.socket.addEventListener("error", err => {
-            console.error("Erreur WebSocket", err);
+        this.socket.on("connect_error", err => {
+            console.error("Erreur Socket.IO", err);
         });
     }
 
-    private resolveWebSocketUrl(): string {
+    private resolveServerEndpoint(): { url: string; path: string } {
         const explicit = (window as any).__PUZZLE_WS__ as string | undefined;
-        if (explicit) return explicit;
+        if (explicit) {
+            try {
+                const parsed = new URL(explicit, window.location.href);
+                const path = parsed.pathname && parsed.pathname !== "/" ? parsed.pathname : "/ws";
+                parsed.pathname = "";
+                parsed.search = "";
+                parsed.hash = "";
+                const base = parsed.toString().replace(/\/$/, "");
+                return { url: base, path };
+            } catch {
+                return { url: explicit, path: "/ws" };
+            }
+        }
         const { protocol, host } = window.location;
-        const scheme = protocol === "https:" ? "wss" : "ws";
-        if (host) {
-            return `${scheme}://${host}/ws`;
-        }
-        return `${scheme}://localhost:8080/ws`;
+        const base = host ? `${protocol}//${host}` : `${protocol === "https:" ? "https:" : "http:"}//localhost:8080`;
+        return { url: base, path: "/ws" };
     }
 
-    private handleServerMessage(message: ServerMessage) {
-        switch (message.type) {
-            case "init":
-                this.applyInit(message);
-                break;
-            case "state":
-                this.applyState(message);
-                break;
-            case "slots":
-                this.applySlots(message);
-                break;
-            case "error":
-                console.error("Serveur:", message.payload.message);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private applyInit(message: ServerInitMessage) {
-        this.playerIndex = message.payload.you;
-        this.levelIndex = message.payload.levelIndex;
-        this.level = message.payload.state;
+    private applyInit(payload: ServerInitPayload) {
+        this.playerIndex = payload.you;
+        this.levelIndex = payload.levelIndex;
+        this.level = payload.state;
         this.ensureDisplay();
         this.render();
         this.updateScore();
-        this.applySlots(message);
+        this.applySlots(payload.slots);
     }
 
-    private applyState(message: ServerStateMessage) {
-        this.levelIndex = message.payload.levelIndex;
-        this.level = message.payload.state;
+    private applyState(payload: ServerStatePayload) {
+        this.levelIndex = payload.levelIndex;
+        this.level = payload.state;
         this.ensureDisplay();
         this.render();
         this.updateScore();
     }
 
-    private applySlots(message: ServerInitMessage | ServerSlotsMessage) {
-        const available = message.payload.slots.filter(slot => !slot.occupied).map(slot => slot.index);
+    private applySlots(slots: PlayerSlotSummary[]) {
+        const available = slots.filter(slot => !slot.occupied).map(slot => slot.index);
         if (available.length === 0) {
             console.info("Toutes les places joueurs sont occupées");
         } else {
@@ -173,12 +174,11 @@ class PuzzleGameClient {
     }
 
     private handleKey = (event: KeyboardEvent) => {
-        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+        if (!this.socket || !this.socket.connected) return;
         if (this.playerIndex === null) return;
         const move = this.resolveMove(event.key);
         if (!move) return;
-        const message: ClientMessage = { type: "move", payload: move };
-        this.send(message);
+        this.socket.emit("move", move);
     };
 
     private resolveMove(key: string): Move | null {
@@ -191,32 +191,6 @@ class PuzzleGameClient {
         return null;
     }
 
-    private send(message: ClientMessage) {
-        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
-        this.socket.send(JSON.stringify(message));
-    }
-
-    private parseMessage(data: unknown): ServerMessage | null {
-        const text = typeof data === "string"
-            ? data
-            : data instanceof ArrayBuffer
-                ? new TextDecoder().decode(data)
-                : data instanceof Uint8Array
-                    ? new TextDecoder().decode(data)
-                    : typeof data === "object" && data !== null && "toString" in data
-                        ? (data as any).toString()
-                        : null;
-        if (!text) {
-            console.warn("Type de message inattendu", data);
-            return null;
-        }
-        try {
-            return JSON.parse(text) as ServerMessage;
-        } catch (err) {
-            console.error("Message serveur invalide", err);
-            return null;
-        }
-    }
 }
 
 new PuzzleGameClient();
