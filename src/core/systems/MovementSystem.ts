@@ -10,7 +10,7 @@ import { Wall } from "../Wall.js";
 export type LevelState = {
     width: number;
     height: number;
-    walls: Set<string>;
+    walls: Wall[];
     doors: Door[];
     plates: Plate[];
     players: [Player, Player];
@@ -95,7 +95,7 @@ export class MovementSystem {
     }
 
     private isWall(x: number, y: number) {
-        return this.state.walls.has(`${x},${y}`);
+        return this.state.walls.some(w => w.coordonneesX === x && w.coordonneesY === y);
     }
 
     private isClosedDoor(x: number, y: number) {
