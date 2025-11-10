@@ -16,30 +16,41 @@ export type LevelState = {
     players: [Player, Player];
 };
 
-type Move = { dx: number; dy: number };
+export type Move = { dx: number; dy: number };
 
-const keyToMoveP1: Record<string, Move> = {
+export const keyToMoveP1: Record<string, Move> = {
     z: { dx: 0, dy: -1 }, Z: { dx: 0, dy: -1 }, w: { dx: 0, dy: -1 }, W: { dx: 0, dy: -1 },
     s: { dx: 0, dy: 1 },  S: { dx: 0, dy: 1 },
     q: { dx: -1, dy: 0 }, Q: { dx: -1, dy: 0 }, a: { dx: -1, dy: 0 }, A: { dx: -1, dy: 0 },
     d: { dx: 1, dy: 0 },  D: { dx: 1, dy: 0 },
 };
 
-const keyToMoveP2: Record<string, Move> = {
+export const keyToMoveP2: Record<string, Move> = {
     ArrowUp: { dx: 0, dy: -1 },
     ArrowDown: { dx: 0, dy: 1 },
     ArrowLeft: { dx: -1, dy: 0 },
     ArrowRight: { dx: 1, dy: 0 },
 };
 
+export type PlayerIndex = 0 | 1;
+
+export type MovementSystemOptions = {
+    controlMode?: "local" | "remote";
+    onRemoteMove?: (player: PlayerIndex, move: Move) => void;
+};
+
 export class MovementSystem {
     private state: LevelState;
     private onChange?: () => void;
     private keydown = (e: KeyboardEvent) => this.handleKey(e);
+    private controlMode: "local" | "remote";
+    private onRemoteMove?: (player: PlayerIndex, move: Move) => void;
 
-    constructor(state: LevelState, onChange?: () => void) {
+    constructor(state: LevelState, onChange?: () => void, options?: MovementSystemOptions) {
         this.state = state;
         this.onChange = onChange;
+        this.controlMode = options?.controlMode ?? "local";
+        this.onRemoteMove = options?.onRemoteMove;
     }
 
     start() {
@@ -55,6 +66,12 @@ export class MovementSystem {
         const m1 = keyToMoveP1[e.key];
         const m2 = keyToMoveP2[e.key];
 
+        if (this.controlMode === "remote") {
+            if (m1) this.onRemoteMove?.(0, m1);
+            if (m2) this.onRemoteMove?.(1, m2);
+            return;
+        }
+
         let moved = false;
 
         if (m1) moved = this.tryMove(0, m1) || moved;
@@ -66,7 +83,25 @@ export class MovementSystem {
         }
     }
 
-    private tryMove(index: 0 | 1, { dx, dy }: Move): boolean {
+    applyMove(index: PlayerIndex, move: Move): boolean {
+        const moved = this.tryMove(index, move);
+        if (moved) {
+            this.refreshDoors();
+            this.onChange?.();
+        }
+        return moved;
+    }
+
+    updateState(state: LevelState) {
+        this.state = state;
+        this.refreshDoors();
+    }
+
+    syncDoors() {
+        this.refreshDoors();
+    }
+
+    private tryMove(index: PlayerIndex, { dx, dy }: Move): boolean {
         const p1 = this.state.players[index];
         const p2 = this.state.players[index === 0 ? 1 : 0];
 
