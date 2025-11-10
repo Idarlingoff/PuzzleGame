@@ -5,10 +5,14 @@
   "scripts": {
     "build": "npx tsc",
     "start": "npx http-server .",
-    "postbuild": "cp -R ./src/assets dist/"
+    "postbuild": "cp -R ./src/assets dist/",
+    "server": "node dist/server/index.js"
   },
   "devDependencies": {
     "http-server": "^14.1.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
   }
 }

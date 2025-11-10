@@ -1,8 +1,8 @@
 import {Color} from "./core/enum/ColorEnum.js";
 import {Point} from "./Point.js";
 import {Plate} from "./core/plates/Plate.js";
-import {Drawer} from "./Drawer.js";
 import {GoldenPlate} from "./core/plates/GoldenPlate.js";
+import {Drawer} from "./Drawer.js";
 import {Shape} from "./core/enum/ShapeEnum.js";
 import {Door} from "./core/Door.js";
 import {Wall} from "./core/Wall.js";
@@ -71,13 +71,14 @@ export class Display {
 
     drawPlates(plates: DrawablePlate[]): void {
         for (const p of plates) {
-            const base = p instanceof GoldenPlate ? colorToHex(Color.GOLD) : colorToHex(p.color);
+            const kind = (p as any).kind ?? (p instanceof GoldenPlate ? "golden" : "pressure");
+            const base = kind === "golden" ? colorToHex(Color.GOLD) : colorToHex(p.color);
             const active = p.isActive;
             const color = active ? lighten(base, 0.35) : base;
 
             const size = 0.8;
 
-            switch (p.shape) {
+            switch (p.shape ?? (kind === "golden" ? Shape.CIRCLE : Shape.SQUARE)) {
                 case Shape.CIRCLE:
                     this.drawer.drawCircle(p.coordonneesX, p.coordonneesY, color, size);
                     break;
