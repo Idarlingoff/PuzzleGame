@@ -1,6 +1,6 @@
-import { Point } from "../Point";
-import { Color } from "./enum/ColorEnum";
-import { Shape } from "./enum/ShapeEnum";
+import { Point } from "../Point.ts";
+import { Color } from "./enum/ColorEnum.ts";
+import { Shape } from "./enum/ShapeEnum.ts";
 
 export class Wall extends Point {
 

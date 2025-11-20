@@ -1,11 +1,11 @@
-import {Color} from "./core/enum/ColorEnum.js";
-import {Point} from "./Point.js";
-import {Plate} from "./core/plates/Plate.js";
-import {Drawer} from "./Drawer.js";
-import {GoldenPlate} from "./core/plates/GoldenPlate.js";
-import {Shape} from "./core/enum/ShapeEnum.js";
-import {Door} from "./core/Door.js";
-import {Wall} from "./core/Wall.js";
+import {Color} from "./core/enum/ColorEnum.ts";
+import {Point} from "./Point.ts";
+import {Plate} from "./core/plates/Plate.ts";
+import {Drawer} from "./Drawer.ts";
+import {GoldenPlate} from "./core/plates/GoldenPlate.ts";
+import {Shape} from "./core/enum/ShapeEnum.ts";
+import {Door} from "./core/Door.ts";
+import {Wall} from "./core/Wall.ts";
 
 
 export type DrawableDoor = Door;

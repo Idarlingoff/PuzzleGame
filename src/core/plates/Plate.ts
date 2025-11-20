@@ -1,6 +1,6 @@
-import { Point } from "../../Point.js";
-import { Color } from "../enum/ColorEnum.js";
-import { Shape } from "../enum/ShapeEnum.js";
+import { Point } from "../../Point.ts";
+import { Color } from "../enum/ColorEnum.ts";
+import { Shape } from "../enum/ShapeEnum.ts";
 
 export abstract class Plate extends Point {
 

@@ -1,20 +1,11 @@
-import { Player } from "../players/Player";
-import { Plate } from "../plates/Plate.js";
-import { GoldenPlate } from "../plates/GoldenPlate.js";
-import { PressurePlate } from "../plates/PressurePlate.js";
-import { Color } from "../enum/ColorEnum.js";
-import { Door } from "../Door.js";
-import { Wall } from "../Wall.js";
-
-
-export type LevelState = {
-    width: number;
-    height: number;
-    walls: Wall[];
-    doors: Door[];
-    plates: Plate[];
-    players: [Player, Player];
-};
+import { Player } from "../players/Player.ts";
+import { Plate } from "../plates/Plate.ts";
+import { GoldenPlate } from "../plates/GoldenPlate.ts";
+import { PressurePlate } from "../plates/PressurePlate.ts";
+import { Color } from "../enum/ColorEnum.ts";
+import { Door } from "../Door.ts";
+import { Wall } from "../Wall.ts";
+import { LevelState } from "./level/LevelLoader.ts";
 
 type Move = { dx: number; dy: number };
 
@@ -34,12 +25,14 @@ const keyToMoveP2: Record<string, Move> = {
 
 export class MovementSystem {
     private state: LevelState;
-    private onChange?: () => void;
+    private onChange?: (playerIndex: number) => void;
+    private localPlayerIndex: number | null;
     private keydown = (e: KeyboardEvent) => this.handleKey(e);
 
-    constructor(state: LevelState, onChange?: () => void) {
+    constructor(state: LevelState, onChange?: (playerIndex: number) => void, localPlayerIndex?: number) {
         this.state = state;
         this.onChange = onChange;
+        this.localPlayerIndex = localPlayerIndex !== undefined ? localPlayerIndex : null;
     }
 
     start() {
@@ -56,13 +49,35 @@ export class MovementSystem {
         const m2 = keyToMoveP2[e.key];
 
         let moved = false;
+        let movedPlayerIndex = -1;
 
-        if (m1) moved = this.tryMove(0, m1) || moved;
-        if (m2) moved = this.tryMove(1, m2) || moved;
+        // Si localPlayerIndex est null (mode jeu solo), accepter tous les mouvements
+        // Si localPlayerIndex est défini (mode multijoueur), accepter seulement ce joueur
+        if (this.localPlayerIndex === null) {
+            // Mode solo : accepter les deux joueurs
+            if (m1) {
+                moved = this.tryMove(0, m1) || moved;
+                if (moved) movedPlayerIndex = 0;
+            }
+
+            if (m2) {
+                moved = this.tryMove(1, m2) || moved;
+                if (moved) movedPlayerIndex = 1;
+            }
+        } else {
+            // Mode multijoueur : accepter seulement le joueur local
+            if (this.localPlayerIndex === 0 && m1) {
+                moved = this.tryMove(0, m1) || moved;
+                if (moved) movedPlayerIndex = 0;
+            } else if (this.localPlayerIndex === 1 && m2) {
+                moved = this.tryMove(1, m2) || moved;
+                if (moved) movedPlayerIndex = 1;
+            }
+        }
 
         if (moved) {
             this.refreshDoors();
-            this.onChange?.();
+            this.onChange?.(movedPlayerIndex);
         }
     }
 

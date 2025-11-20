@@ -1,6 +1,6 @@
-import { Plate } from "./Plate.js";
-import { Color } from "../enum/ColorEnum.js";
-import { Shape } from "../enum/ShapeEnum.js";
+import { Plate } from "./Plate.ts";
+import { Color } from "../enum/ColorEnum.ts";
+import { Shape } from "../enum/ShapeEnum.ts";
 
 export class GoldenPlate extends Plate {
 

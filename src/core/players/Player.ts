@@ -1,6 +1,6 @@
-import {Point} from "../../Point.js";
-import {Color} from "../enum/ColorEnum.js";
-import {Shape} from "../enum/ShapeEnum.js";
+import {Point} from "../../Point.ts";
+import {Color} from "../enum/ColorEnum.ts";
+import {Shape} from "../enum/ShapeEnum.ts";
 
 export class Player extends Point {
     private readonly _id: 1 | 2;
