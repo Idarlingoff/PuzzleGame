@@ -2,13 +2,22 @@
   "name": "puzzlegame",
   "version": "1.0.0",
   "type": "module",
+  "main": "index.ts",
   "scripts": {
-    "build": "npx tsc",
-    "start": "npx http-server .",
-    "postbuild": "cp -R ./src/assets dist/"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:client": "esbuild public/client.ts --bundle --outfile=public/client.js --platform=browser",
+    "build:client:watch": "esbuild public/client.ts --bundle --outfile=public/client.js --platform=browser --watch",
+    "dev": "npm run build:client && node --watch --experimental-transform-types index.ts",
+    "start": "npm run build:client && node --experimental-transform-types index.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
-    "http-server": "^14.1.1",
-    "typescript": "^5.9.3"
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.1",
+    "esbuild": "^0.27.0"
   }
 }

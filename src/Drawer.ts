@@ -8,7 +8,14 @@ export class Drawer {
       canvas.width = width * this.scale;
       canvas.height = height * this.scale;
       this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-      document.body.appendChild(canvas);
+
+      // Ajouter le canvas à l'élément display
+      const displayElement = document.getElementById('display');
+      if (displayElement) {
+        displayElement.appendChild(canvas);
+      } else {
+        document.body.appendChild(canvas);
+      }
     }
   
     public clear():void {

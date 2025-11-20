@@ -1,20 +1,36 @@
-import { Player } from "../../players/Player.js";
-import { GoldenPlate } from "../../plates/GoldenPlate.js";
-import { PressurePlate } from "../../plates/PressurePlate.js";
-import { Plate } from "../../plates/Plate.js";
-import { Door } from "../../Door.js";
-import { Wall } from "../../Wall.js";
-import { Color } from "../../enum/ColorEnum.js";
-import { Shape } from "../../enum/ShapeEnum.js";
+import { Player } from "../../players/Player.ts";
+import { GoldenPlate } from "../../plates/GoldenPlate.ts";
+import { PressurePlate } from "../../plates/PressurePlate.ts";
+import { Plate } from "../../plates/Plate.ts";
+import { Door } from "../../Door.ts";
+import { Wall } from "../../Wall.ts";
+import { Color } from "../../enum/ColorEnum.ts";
+import { Shape } from "../../enum/ShapeEnum.ts";
 
-export type LevelState = {
+export class LevelState {
     width: number;
     height: number;
     walls: Wall[];
     doors: Door[];
     plates: Plate[];
     players: [Player, Player];
-};
+
+    constructor(
+        width: number,
+        height: number,
+        walls: Wall[],
+        doors: Door[],
+        plates: Plate[],
+        players: [Player, Player]
+    ) {
+        this.width = width;
+        this.height = height;
+        this.walls = walls;
+        this.doors = doors;
+        this.plates = plates;
+        this.players = players;
+    }
+}
 
 // ---- helpers
 const key = (x: number, y: number) => `${x},${y}`;
@@ -73,19 +89,16 @@ export function buildLevelFromJson(json: any): LevelState {
     const p1 = new Player(1, p1start[0], p1start[1], Color.BLUE, Shape.CIRCLE);
     const p2 = new Player(2, p2start[0], p2start[1], Color.RED, Shape.CIRCLE);
 
-    return {
-        width: w,
-        height: h,
-        walls,
-        doors,
-        plates,
-        players: [p1, p2],
-    };
+    return new LevelState(w, h, walls, doors, plates, [p1, p2]);
 }
 
 export async function loadLevelFromUrl(url: string): Promise<LevelState> {
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`Impossible de charger ${url} (${resp.status})`);
-    const data = await resp.json();
-    return buildLevelFromJson(data);
+    try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`Impossible de charger ${url} (${resp.status})`);
+        const data = await resp.json();
+        return buildLevelFromJson(data);
+    } catch (error) {
+        throw new Error(`Impossible de charger ${url}: ${error}`);
+    }
 }

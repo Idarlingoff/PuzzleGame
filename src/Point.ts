@@ -1,5 +1,5 @@
-import {Color} from "./core/enum/ColorEnum.js";
-import {Shape} from "./core/enum/ShapeEnum.js";
+import {Color} from "./core/enum/ColorEnum.ts";
+import {Shape} from "./core/enum/ShapeEnum.ts";
 
 export class Point {
 

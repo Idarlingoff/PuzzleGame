@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <title>Multiplayer Puzzles</title>
+  <style>
+    .float {
+      float: left;
+    }
+
+    canvas {
+      border: 1px solid black;
+      background-color: white;
+    }
+
+    html,
+    body {
+      overflow: hidden;
+
+    }
+
+    #score_display {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 2%;
+      padding-left: 13%;
+      padding-top: 1%;
+    }
+  </style>
+</head>
+
+<body style="background-color:#faf0e6">
+
+
+  <div id="score_display">Level : <span id="score"></span></div>
+  <div id="display" class="float"></div>
+</body>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+  integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+
+<script src="client.js"></script>
+
+
+</html>

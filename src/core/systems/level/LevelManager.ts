@@ -1,5 +1,5 @@
-import { loadLevelFromUrl, LevelState } from "./LevelLoader.js";
-import { GoldenPlate } from "../../plates/GoldenPlate.js";
+import { loadLevelFromUrl, LevelState } from "./LevelLoader.ts";
+import { GoldenPlate } from "../../plates/GoldenPlate.ts";
 
 export class LevelManager {
     private urls: string[];
